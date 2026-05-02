@@ -84,9 +84,9 @@ const dburl = process.env.ATLASDB_URL;
 // Store sessions in MongoDB instead of memory
 const store = MongoStore.create({
   mongoUrl: dburl,
-  crypto: {
+  /* crypto: {
     secret: process.env.SECRET,  // Encrypt session data
-  },
+  }, */
   touchAfter: 24 * 3600,         // Update session only once per day
 });
 
