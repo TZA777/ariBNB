@@ -196,8 +196,8 @@ app.use("/", userRouter);
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error("💥 Error:", err);
-  res.status(500).send("Something broke: " + err.message);
+  let { status = 500, message = "Something went wrong" } = err;
+  res.status(status).render("error/error.ejs", { message });
 });
 
 
