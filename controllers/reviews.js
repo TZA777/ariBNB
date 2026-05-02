@@ -55,7 +55,10 @@ module.exports.createReview = async (req, res) => {
   req.flash("success", "New review saved");
 
   // Redirect back to listing show page
-  res.redirect(`/listings/${listing.id}`);
+  req.session.save((err) => {
+    if (err) return next(err);
+    res.redirect(`/listings/${listing.id}`);
+  });
 };
 
 
@@ -81,5 +84,8 @@ module.exports.destroyReview = async (req, res) => {
   req.flash("success", "Reveiw deleted");
 
   // Redirect back to listing page
-  res.redirect(`/listings/${id}`);
+  req.session.save((err) => {
+    if (err) return next(err);
+    res.redirect(`/listings/${id}`);
+  });
 };

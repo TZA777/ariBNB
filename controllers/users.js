@@ -29,31 +29,32 @@ module.exports.signup = async (req, res, next) => {
     const newUser = new User({ username, email });
 
     // Register user using passport-local-mongoose
-    // 👉 This automatically:
-    // - hashes password
-    // - stores user in DB
     const registeredUser = await User.register(newUser, password);
 
     // Automatically log the user in after signup
-    req.login(registeredUser, (err) => {
-      if (err) {
-        return next(err); // pass error to global handler
-      }
+    // We wrap req.login in a promise so we can 'await' it correctly
+    await new Promise((resolve, reject) => {
+      req.login(registeredUser, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
 
-      // Flash success message
-      req.flash("success", "welcome to AIRBNB");
-
-      // Redirect to listings page
-      return res.redirect("/listings");
+    // Flash success message and save session explicitly before redirect
+    req.flash("success", "Welcome to AIRBNB");
+    req.session.save((err) => {
+      if (err) return next(err);
+      res.redirect("/listings");
     });
 
   } catch (e) {
     // If error occurs (e.g., duplicate username)
-
     req.flash("error", e.message);
 
     // Redirect user back to signup page on error
-    return res.redirect("/signup");
+    req.session.save(() => {
+      res.redirect("/signup");
+    });
   }
 };
 
@@ -81,7 +82,10 @@ module.exports.login = async (req, res) => {
   const redirectUrl = res.locals.redirectUrl || "/listings";
 
   // Redirect user to original page or default
-  res.redirect(redirectUrl);
+  req.session.save((err) => {
+    if (err) return next(err);
+    res.redirect(redirectUrl);
+  });
 };
 
 
@@ -89,19 +93,19 @@ module.exports.login = async (req, res) => {
 // LOGOUT USER
 // =======================
 
-module.exports.logout = (req, res, next) => {
-
+module.exports.logout = async (req, res, next) => {
   // Passport logout → removes user session
-  req.logout((err) => {
+  // Wrap in promise for await support
+  await new Promise((resolve, reject) => {
+    req.logout((err) => {
+      if (err) return reject(err);
+      resolve();
+    });
+  });
 
-    if (err) {
-      return next(err); // handle error
-    }
-
-    // Flash message
-    req.flash("success", "you are logged out!");
-
-    // Redirect to listings page
+  req.flash("success", "you are logged out!");
+  req.session.save((err) => {
+    if (err) return next(err);
     res.redirect("/listings");
   });
 };

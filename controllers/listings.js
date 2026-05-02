@@ -98,7 +98,10 @@ module.exports.createRouter = async (req, res, next) => {
   req.flash("success", "New Listing Created");
 
   // Redirect to listings page
-  res.redirect("/listings");
+  req.session.save((err) => {
+    if (err) return next(err);
+    res.redirect("/listings");
+  });
 };
 
 
@@ -155,7 +158,10 @@ module.exports.updateRouter = async (req, res) => {
   req.flash("success", "Listing updated");
 
   // Redirect to updated listing page
-  res.redirect(`/listings/${id}`);
+  req.session.save((err) => {
+    if (err) return next(err);
+    res.redirect(`/listings/${id}`);
+  });
 };
 
 
@@ -173,7 +179,10 @@ module.exports.destroyRoute = async (req, res) => {
   req.flash("success", "Listing deleted");
 
   // Redirect to all listings
-  res.redirect("/listings");
+  req.session.save((err) => {
+    if (err) return next(err);
+    res.redirect("/listings");
+  });
 };
 
 

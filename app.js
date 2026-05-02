@@ -175,8 +175,7 @@ async function main() {
 
 // Test error route
 app.get("/error", async (req, res, next) => {
-  next(new ExpressError(401, "status")); // trigger custom error
-  res.send("hi"); // (this won't run because error is thrown)
+  return next(new ExpressError(401, "status")); // trigger custom error and STOP
 });
 
 // Home route → redirect to listings
@@ -196,6 +195,10 @@ app.use("/", userRouter);
 
 // Global error handler
 app.use((err, req, res, next) => {
+  console.error("💥 Error:", err);
+  if (res.headersSent) {
+    return next(err);
+  }
   let { status = 500, message = "Something went wrong" } = err;
   res.status(status).render("error/error.ejs", { err: message });
 });
