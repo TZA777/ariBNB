@@ -71,8 +71,13 @@ module.exports.isOwner = async (req, res, next) => {
   // Fetch listing from database
   let listing = await Listing.findById(id);
 
+  // If listing doesn't exist
+  if (!listing) {
+    req.flash("error", "Listing not found");
+    return res.redirect("/listings");
+  }
+
   // Compare listing owner with current logged-in user
-  // .equals() is used because MongoDB ObjectIds need special comparison
   if (!listing.owner._id.equals(res.locals.currUser._id)) {
 
     // If not owner → deny action
@@ -104,8 +109,8 @@ module.exports.validateListing = (req, res, next) => {
 
     console.log("err found in server validation");
 
-    // Throw custom error → handled by global error handler
-    throw new ExpressError(404, errMsg);
+    // Throw custom error (400 Bad Request for validation)
+    throw new ExpressError(400, errMsg);
 
   } else {
     // If valid → continue
@@ -131,8 +136,8 @@ module.exports.validateReview = (req, res, next) => {
 
     console.log("err found in server validation");
 
-    // Throw error
-    throw new ExpressError(404, errMsg);
+    // Throw error (400 Bad Request)
+    throw new ExpressError(400, errMsg);
 
   } else {
     // If valid → continue
@@ -152,6 +157,12 @@ module.exports.isAuthor = async (req, res, next) => {
 
   // Fetch review from database
   let review = await Review.findById(reviewId);
+
+  // If review doesn't exist
+  if (!review) {
+    req.flash("error", "Review not found");
+    return res.redirect(`/listings/${id}`);
+  }
 
   // Check if current user is the author of the review
   if (!review.author._id.equals(res.locals.currUser._id)) {

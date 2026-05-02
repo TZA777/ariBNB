@@ -57,11 +57,18 @@ module.exports.createRouter = async (req, res, next) => {
     })
     .send();
 
-  // Example: { type: "Point", coordinates: [lng, lat] }
-  console.log(response.body.features[0].geometry);
-
+  // Check if geocoding was successful
+  if (!response.body.features.length) {
+    req.flash("error", "Invalid location provided");
+    return res.redirect("/listings/new");
+  }
 
   // Get uploaded image info from multer + Cloudinary
+  if (!req.file) {
+    req.flash("error", "Please upload an image");
+    return res.redirect("/listings/new");
+  }
+
   let url = req.file.path;       // Cloudinary URL
   let filename = req.file.filename;
 
@@ -107,8 +114,8 @@ module.exports.renderEditRouter = async (req, res, next) => {
 
   // If not found → handle error
   if (!listing) {
-    req.flash("error", "Listing you requested do not exist");
-    return res.redirect("/login");
+    req.flash("error", "Listing you requested does not exist");
+    return res.redirect("/listings");
   }
 
   // Modify image URL to resize using Cloudinary transformation
@@ -133,7 +140,7 @@ module.exports.updateRouter = async (req, res) => {
   let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
 
   // If new image uploaded → update image
-  if (typeof req.file !== undefined) {
+  if (req.file) {
 
     let url = req.file.path;
     let filename = req.file.filename;

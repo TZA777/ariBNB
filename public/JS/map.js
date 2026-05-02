@@ -6,6 +6,10 @@
 // mapToken is usually passed from backend (EJS → frontend)
 mapboxgl.accessToken = mapToken;
 
+// Retrieve listing data from the DOM (passed securely via data attribute)
+const listingElement = document.getElementById("listing-data");
+const listing = JSON.parse(listingElement.getAttribute("data-listing"));
+
 
 // =======================
 // CREATE MAP INSTANCE

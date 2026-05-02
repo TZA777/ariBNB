@@ -52,8 +52,8 @@ module.exports.signup = async (req, res, next) => {
 
     req.flash("error", e.message);
 
-    // Redirect user (⚠️ usually better to redirect to signup page)
-    return res.redirect("/listings");
+    // Redirect user back to signup page on error
+    return res.redirect("/signup");
   }
 };
 
